@@ -1,34 +1,37 @@
 {
 	"name": "@hyperupcall/npm-package-json-lint-config",
-	"type": "module",
-	"main": "index.cjs",
 	"version": "0.2.2",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/hyperupcall-projects/npm-package-json-lint-config"
+	},
+	"bugs": {
+		"url": "https://github.com/hyperupcall-projects/npm-package-json-lint-config/issues"
+	},
+	"author": "Edwin Kofler <edwin@kofler.dev> (https://edwinkofler.com)",
 	"private": false,
 	"packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
+	"main": "index.cjs",
+	"files": [
+		"index.cjs",
+		"npmpackagejsonlint.config.js"
+	],
 	"scripts": {
 		"format": "hyperupcall-scripts-nodejs format",
 		"lint": "hyperupcall-scripts-nodejs lint"
 	},
 	"devDependencies": {
-		"@hyperupcall/scripts-nodejs": "0.13.0"
+		"@hyperupcall/scripts-nodejs": "^0.13.0"
+	},
+	"commitlint": {
+		"extends": "/storage/extras/Documents/Computing/Experiments/commitlint-config"
 	},
 	"markdownlint-cli2": {
 		"extends": "./node_modules/@hyperupcall/markdownlint-config/.markdownlint.json"
 	},
-	"files": [
-		"index.cjs",
-		"npmpackagejsonlint.config.js"
-	],
-	"prettier": "@hyperupcall/scripts-nodejs/config-prettier.js",
-	"author": "Edwin Kofler <edwin@kofler.dev> (https://edwinkofler.com)",
-	"bugs": {
-		"url": "https://github.com/hyperupcall-projects/npm-package-json-lint-config/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/hyperupcall-projects/npm-package-json-lint-config"
-	},
 	"npmpackagejsonlint": {
-		"extends": "npm-package-json-lint-config-default"
-	}
+		"extends": "@hyperupcall/scripts-nodejs/npmpackagejsonlint.config.js"
+	},
+	"prettier": "@hyperupcall/scripts-nodejs/config-prettier.js"
 }
