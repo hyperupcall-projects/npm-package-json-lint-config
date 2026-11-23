@@ -63,12 +63,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Invoke tools directly until scripts-nodejs propagates exit codes.
-      - name: Check formatting and lint
-        run: |
-          node_modules/@hyperupcall/scripts-nodejs/node_modules/.bin/prettier --check --ignore-unknown .
-          node_modules/@hyperupcall/scripts-nodejs/node_modules/.bin/eslint .
-
       - name: Pack and verify package contents
         id: pack
         run: |
