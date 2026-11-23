@@ -15,6 +15,10 @@
 	"markdownlint-cli2": {
 		"extends": "./node_modules/@hyperupcall/markdownlint-config/.markdownlint.json"
 	},
+	"files": [
+		"index.cjs",
+		"npmpackagejsonlint.config.js"
+	],
 	"prettier": "@hyperupcall/scripts-nodejs/config-prettier.js",
 	"author": "Edwin Kofler <edwin@kofler.dev> (https://edwinkofler.com)",
 	"bugs": {
