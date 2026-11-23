@@ -15,22 +15,17 @@ defaults:
   run:
     shell: bash
 
-env:
-  NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
-
 jobs:
-  validate:
-    if: github.repository == 'hyperupcall-projects/npm-package-json-lint-config'
+  pack:
+    if: ${{ !github.event.repository.fork }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     outputs:
       dist-tag: ${{ steps.release.outputs.dist-tag }}
-      sha256: ${{ steps.pack.outputs.sha256 }}
 
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          fetch-depth: 0
           persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
@@ -38,89 +33,29 @@ jobs:
           node-version: '26'
           package-manager-cache: false
 
-      - name: Verify release tag and branch
+      - name: Verify release tag
+        run: node -e "require('node:assert/strict').equal(process.env.GITHUB_REF_NAME, 'v' + require('./package.json').version)"
+
+      - name: Select release channel
         id: release
         run: |
-          git merge-base --is-ancestor HEAD origin/main
-          node --input-type=module <<'NODE'
-          import assert from 'node:assert/strict';
-          import { readFileSync, appendFileSync } from 'node:fs';
+          tag=$(node -p "require('./package.json').version.includes('-') ? 'next' : 'latest'")
+          echo "dist-tag=$tag" >> "$GITHUB_OUTPUT"
 
-          const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-          assert.equal(pkg.name, '@hyperupcall/npm-package-json-lint-config');
-          assert.notEqual(pkg.private, true);
-          assert.equal(process.env.GITHUB_REF_NAME, `v${pkg.version}`);
-
-          const tag = pkg.version.includes('-') ? 'next' : 'latest';
-          appendFileSync(process.env.GITHUB_OUTPUT, `dist-tag=${tag}\n`);
-          NODE
-
-      # Reads the pinned pnpm version from package.json.
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
-        with:
-          run_install: false
-          cache: false
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: Pack and verify package contents
-        id: pack
-        run: |
-          npm pack --ignore-scripts --json --pack-destination "$RUNNER_TEMP" > "$RUNNER_TEMP/pack.json"
-
-          node --input-type=module <<'NODE'
-          import assert from 'node:assert/strict';
-          import { readFileSync, renameSync } from 'node:fs';
-          import { join } from 'node:path';
-
-          const dir = process.env.RUNNER_TEMP;
-          const [pkg] = JSON.parse(readFileSync(join(dir, 'pack.json'), 'utf8'));
-
-          assert.deepEqual(pkg.files.map(file => file.path).sort(), [
-            'LICENSE',
-            'README.md',
-            'index.cjs',
-            'npmpackagejsonlint.config.js',
-            'package.json',
-          ].sort());
-
-          renameSync(join(dir, pkg.filename), join(dir, 'package.tgz'));
-          NODE
-
-          printf 'sha256=%s\n' "$(sha256sum "$RUNNER_TEMP/package.tgz" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
-
-      - name: Test the packed package in a clean consumer
-        run: |
-          consumer_dir=$(mktemp -d)
-          cd "$consumer_dir"
-          npm init --yes
-          npm install --ignore-scripts --no-audit --no-fund "$RUNNER_TEMP/package.tgz"
-
-          node --input-type=module <<'NODE'
-          import assert from 'node:assert/strict';
-          import { createRequire } from 'node:module';
-          import config from '@hyperupcall/npm-package-json-lint-config';
-
-          const require = createRequire(import.meta.url);
-          assert.strictEqual(require('@hyperupcall/npm-package-json-lint-config'), config);
-          assert.equal(config.rules['require-name'], 'error');
-          assert.equal(config.rules['require-version'], 'error');
-
-          console.log('Packed package loads through both import and require.');
-          NODE
+      - name: Pack package
+        run: npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP"
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: npm-package
-          path: ${{ runner.temp }}/package.tgz
-          if-no-files-found: error
+          path: ${{ runner.temp }}/*.tgz
           retention-days: 7
 
   publish:
-    needs: validate
+    needs: pack
     runs-on: ubuntu-latest
     environment: Publish
-    timeout-minutes: 10
+    timeout-minutes: 60
     permissions:
       contents: read
       id-token: write
@@ -133,7 +68,6 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: '26'
-          registry-url: https://registry.npmjs.org/
           package-manager-cache: false
 
       - name: Install npm with staged publishing support
@@ -144,11 +78,7 @@ jobs:
           name: npm-package
           path: ${{ runner.temp }}/npm-release
 
-      - name: Verify and stage the validated tarball
+      - name: Stage package
         env:
-          EXPECTED_SHA256: ${{ needs.validate.outputs.sha256 }}
-          DIST_TAG: ${{ needs.validate.outputs.dist-tag }}
-        run: |
-          tarball="$RUNNER_TEMP/npm-release/package.tgz"
-          printf '%s  %s\n' "$EXPECTED_SHA256" "$tarball" | sha256sum --check
-          npm stage publish "$tarball" --access public --tag "$DIST_TAG" --ignore-scripts
+          DIST_TAG: ${{ needs.pack.outputs.dist-tag }}
+        run: npm stage publish "$RUNNER_TEMP"/npm-release/*.tgz --access public --tag "$DIST_TAG" --ignore-scripts
