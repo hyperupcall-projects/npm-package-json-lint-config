@@ -1,6 +1,6 @@
 {
 	"name": "@hyperupcall/npm-package-json-lint-config",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"type": "module",
 	"repository": {
 		"type": "git",
