@@ -11,7 +11,7 @@
 	},
 	"author": "Edwin Kofler <edwin@kofler.dev> (https://edwinkofler.com)",
 	"private": false,
-	"packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
+	"packageManager": "pnpm@12.23.0",
 	"exports": {
 		".": {
 			"types": "./index.d.cts",
@@ -27,17 +27,17 @@
 		"lint": "hyperupcall-scripts-nodejs lint"
 	},
 	"devDependencies": {
-		"@hyperupcall/scripts-nodejs": "^0.13.0",
+		"@hyperupcall/scripts-nodejs": "0.17.0",
 		"npm-package-json-lint": "11.0.1"
 	},
 	"commitlint": {
 		"extends": "/storage/extras/Documents/Computing/Experiments/commitlint-config"
 	},
 	"markdownlint-cli2": {
-		"extends": "./node_modules/@hyperupcall/markdownlint-config/.markdownlint.json"
+		"extends": "./node_modules/@hyperupcall/scripts-nodejs/.markdownlint.mjs"
 	},
 	"npmpackagejsonlint": {
-		"extends": "@hyperupcall/scripts-nodejs/npmpackagejsonlint.config.js"
+		"extends": "@hyperupcall/scripts-nodejs/config-npmpackagejsonlint.js"
 	},
 	"prettier": "@hyperupcall/scripts-nodejs/config-prettier.js"
 }
