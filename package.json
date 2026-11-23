@@ -1,14 +1,13 @@
 {
 	"name": "@hyperupcall/npm-package-json-lint-config",
+	"type": "module",
+	"main": "index.cjs",
 	"version": "0.1.0",
 	"private": false,
 	"packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
 	"scripts": {
 		"format": "hyperupcall-scripts-nodejs format",
 		"lint": "hyperupcall-scripts-nodejs lint"
-	},
-	"dependencies": {
-		"npm-package-json-lint-config-default": "^6.0.0"
 	},
 	"devDependencies": {
 		"@hyperupcall/scripts-nodejs": "0.13.0"
